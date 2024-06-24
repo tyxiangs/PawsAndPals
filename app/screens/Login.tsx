@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, Text, ActivityIndicator, Button, KeyboardAvoidingView } from 'react-native';
+import { View, TextInput, StyleSheet, Text, ActivityIndicator, Button, KeyboardAvoidingView, Image } from 'react-native';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
@@ -38,6 +38,7 @@ const Login = () => {
 
   return (
     <View style={styles.container}>
+      <Image source={require('../../assets/pp_logo.png')} style={styles.logo} />
       <KeyboardAvoidingView behavior="padding">
         <TextInput
           value={email}
@@ -75,6 +76,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
   },
   input: {
     marginVertical: 4,
