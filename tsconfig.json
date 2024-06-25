@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "extends": "./node_modules/expo/tsconfig.base",
   "compilerOptions": {
@@ -8,3 +9,15 @@
     "Home.ts"
   ]
 }
+=======
+{
+  "extends": "./node_modules/expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true
+  },
+  "exclude": [
+    "Firebase.Config.ts",
+    "Home.ts"
+  ]
+}
+>>>>>>> dd0334bb80b9c33024309488173ac3fcabd153a5
