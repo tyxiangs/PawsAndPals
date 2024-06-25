@@ -9,16 +9,16 @@ const Details = () => {
                 provider={PROVIDER_GOOGLE}
                 style={styles.map}
                 region={{
-                    latitude: 1.2907
-                    longitude: 103.7727
+                    latitude: 1.2907,
+                    longitude: 103.7727,
                     latitudeDelta: 0.015,
                     longitudeDelta: 0.0121,
                 }}
             >
                 <Marker
                     coordinate={{
-                        latitude: 1.3071
-                        longitude: 103.7694
+                        latitude: 1.3071,
+                        longitude: 103.7694,
                     }}
                     title={'You are here'}
                     description={'This is your location'}
