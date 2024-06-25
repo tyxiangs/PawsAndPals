@@ -11,6 +11,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "google": {
+      "maps": {
+        "apiKey": "AIzaSyCmkhkDMnQRaudPb8ZFjBaYjP1QeYU5s6c"
+      }
+    },
     "ios": {
       "supportsTablet": true
     },

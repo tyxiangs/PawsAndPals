@@ -1,11 +1,15 @@
+import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { enableScreens } from 'react-native-screens';
+enableScreens();
 import Login from './app/screens/Login';
 import List from './app/screens/List';
 import Details from './app/screens/Details';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './FirebaseConfig';
+
 
 const Stack = createNativeStackNavigator();
 
