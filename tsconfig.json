@@ -8,13 +8,3 @@
     "Home.ts"
   ]
 }
-{
-  "extends": "./node_modules/expo/tsconfig.base",
-  "compilerOptions": {
-    "strict": true
-  },
-  "exclude": [
-    "Firebase.Config.ts",
-    "Home.ts"
-  ]
-}
