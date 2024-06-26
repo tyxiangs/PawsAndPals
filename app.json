@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 {
   "expo": {
     "name": "paws",
@@ -31,37 +31,3 @@
     }
   }
 }
-=======
-{
-  "expo": {
-    "name": "paws",
-    "slug": "paws",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "google": {
-      "maps": {
-        "apiKey": "AIzaSyCmkhkDMnQRaudPb8ZFjBaYjP1QeYU5s6c"
-      }
-    },
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
-  }
-}
->>>>>>> dd0334bb80b9c33024309488173ac3fcabd153a5
