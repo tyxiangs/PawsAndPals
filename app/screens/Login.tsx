@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Text, ActivityIndicator, Button, KeyboardAvoidingView, Image } from 'react-native';
-import { FIREBASE_AUTH } from '../../FirebaseConfig';
+import { auth } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../../types';
+
+type LoginScreenNavigationProp = NavigationProp<RootStackParamList, 'Login'>;
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const auth = FIREBASE_AUTH;
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const signIn = async () => {
     setLoading(true);
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
       console.log(response);
+      navigation.navigate('MapComponent'); // Navigate to Map on successful login
     } catch (error: any) {
       console.log(error);
       alert('Sign in failed: ' + error.message);
@@ -92,5 +97,3 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
-
-
