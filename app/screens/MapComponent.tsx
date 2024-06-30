@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Button, Image } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE, Region, LatLng } from 'react-native-maps';
+import MapView, { Marker, Callout, PROVIDER_GOOGLE, Region, LatLng } from 'react-native-maps';
 import * as ImagePicker from 'expo-image-picker';
 
 const INITIAL_REGION = {
-  latitude: 1.2966, // Latitude for NUS
-  longitude: 103.7764, // Longitude for NUS
+  latitude: 1.2966,
+  longitude: 103.7764,
   latitudeDelta: 0.0922,
   longitudeDelta: 0.0421,
 };
 
-const MIN_LATITUDE_DELTA = 0.001; // Minimum zoom level
-const MAX_LATITUDE_DELTA = 1.0; // Maximum zoom level
+const MIN_LATITUDE_DELTA = 0.0001; // Allow more precise zooming
+const MAX_LATITUDE_DELTA = 1.0;
 
 interface MarkerData {
   coordinate: LatLng;
@@ -44,6 +44,10 @@ const Map = () => {
     }
   };
 
+  const deleteMarker = (index: number) => {
+    setMarkers((prevMarkers) => prevMarkers.filter((_, i) => i !== index));
+  };
+
   const zoomIn = () => {
     setRegion((prevRegion) => ({
       ...prevRegion,
@@ -62,7 +66,7 @@ const Map = () => {
 
   useEffect(() => {
     if (mapRef.current) {
-      mapRef.current.animateToRegion(region, 1000); // Add a duration for smooth zooming
+      mapRef.current.animateToRegion(region, 1000);
     }
   }, [region]);
 
@@ -78,10 +82,10 @@ const Map = () => {
       >
         {markers.map((marker, index) => (
           <Marker key={index} coordinate={marker.coordinate}>
-            <Image
-              source={{ uri: marker.image }}
-              style={{ width: 50, height: 50 }}
-            />
+            <Image source={{ uri: marker.image }} style={{ width: 50, height: 50 }} />
+            <Callout>
+              <Button title="Delete" onPress={() => deleteMarker(index)} />
+            </Callout>
           </Marker>
         ))}
       </MapView>
