@@ -19,6 +19,7 @@ const App = () => {
           component={MapComponent}
           options={{ title: 'Map' }}
         />
+         <Stack.Screen name="Chat" component={Chat} />
       </Stack.Navigator>
     </NavigationContainer>
   );

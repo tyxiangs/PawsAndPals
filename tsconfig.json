@@ -7,7 +7,8 @@
     "Firebase.Config.ts",
     "Home.ts",
     "Details.ts",
-    "Map.ts"
+    "Map.ts",
+    "Chat.ts"
   ]
 }
 

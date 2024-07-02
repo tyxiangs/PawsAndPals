@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Text, ActivityIndicator, Button, KeyboardAvoidingView, Image } from 'react-native';
-import { auth } from '../../FirebaseConfig';
+import { auth, db } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types';
@@ -75,6 +75,7 @@ const Login = () => {
 };
 
 export default Login;
+
 
 const styles = StyleSheet.create({
   container: {
