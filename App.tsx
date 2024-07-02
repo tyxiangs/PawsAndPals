@@ -1,48 +1,27 @@
 import 'react-native-gesture-handler';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { enableScreens } from 'react-native-screens';
-enableScreens();
+import { createStackNavigator } from '@react-navigation/stack';
 import Login from './app/screens/Login';
-import List from './app/screens/List';
-import Details from './app/screens/Details';
-import React, { useState, useEffect } from 'react';
-import { User, onAuthStateChanged } from 'firebase/auth';
-import { FIREBASE_AUTH } from './FirebaseConfig';
+import MapComponent from './app/screens/MapComponent'; // Ensure this path is correct
+import { RootStackParamList } from './types';
 
+const Stack = createStackNavigator<RootStackParamList>();
 
-const Stack = createNativeStackNavigator();
-const InsideStack = createNativeStackNavigator();
-
-function InsideLayout() {
-  return (
-    <InsideStack.Navigator>
-      <InsideStack.Screen name="My todos" component={List} />
-      <InsideStack.Screen name="details" component={Details} />
-    </InsideStack.Navigator>
-  );
-}
-
-export default function App() {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
-      console.log('user', user);
-      setUser(user);
-    });
-    return unsubscribe; // Cleanup subscription on unmount
-  }, []);
-
+const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
-        {user ? (
-          <Stack.Screen name="Inside" component={InsideLayout} options={{ headerShown: false }} />
-        ) : (
-          <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-        )}
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen
+          name="MapComponent"
+          component={MapComponent}
+          options={{ title: 'Map' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
-}
+};
+
+export default App;
+

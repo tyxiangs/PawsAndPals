@@ -5,6 +5,9 @@
   },
   "exclude": [
     "Firebase.Config.ts",
-    "Home.ts"
+    "Home.ts",
+    "Details.ts",
+    "Map.ts"
   ]
 }
+
