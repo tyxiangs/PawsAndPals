@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Login from './app/screens/Login';
 import MapComponent from './app/screens/MapComponent'; // Ensure this path is correct
+import Chat from './app/screens/Chat';
 import { RootStackParamList } from './types';
 
 const Stack = createStackNavigator<RootStackParamList>();
