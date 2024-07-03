@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Button, Image } from 'react-native';
 import MapView, { Marker, Callout, PROVIDER_GOOGLE, Region, LatLng } from 'react-native-maps';
 import * as ImagePicker from 'expo-image-picker';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../../types'; 
 
 const INITIAL_REGION = {
   latitude: 1.2966,
@@ -18,7 +20,10 @@ interface MarkerData {
   image: string | undefined;
 }
 
+type MapComponentNavigationProp = NavigationProp<RootStackParamList, 'MapComponent'>;
+
 const Map = () => {
+  const navigation = useNavigation<MapComponentNavigationProp>();
   const [region, setRegion] = useState<Region>(INITIAL_REGION);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const mapRef = useRef<MapView>(null);
@@ -72,6 +77,10 @@ const Map = () => {
 
   return (
     <View style={styles.container}>
+      <Button
+        title="Go to Chat"
+        onPress={() => navigation.navigate('Chat')}
+      />
       <MapView
         ref={mapRef}
         style={styles.map}
