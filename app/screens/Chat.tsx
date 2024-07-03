@@ -5,7 +5,7 @@ import { auth, db } from '../../FirebaseConfig';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types';
 import { Avatar } from 'react-native-elements';
-import { collection, addDoc, orderBy, query, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, orderBy, query, onSnapshot, Timestamp } from 'firebase/firestore';
 
 type ChatNavigationProp = NavigationProp<RootStackParamList, 'Chat'>;
 
@@ -49,10 +49,14 @@ const Chat = ({ navigation }: { navigation: ChatNavigationProp }) => {
         const messagesRef = collection(db, 'messages');
         const q = query(messagesRef, orderBy('createdAt', 'desc'));
         onSnapshot(q, (snapshot) => {
-            const messages = snapshot.docs.map((doc) => ({
-                _id: doc.id,
-                ...doc.data(),
-            } as IMessage));
+            const messages = snapshot.docs.map((doc) => {
+                const data = doc.data();
+                return {
+                    _id: doc.id,
+                    ...data,
+                    createdAt: data.createdAt.toDate() 
+                } as IMessage;
+            });
             setMessages(messages);
         });
     };
@@ -61,7 +65,13 @@ const Chat = ({ navigation }: { navigation: ChatNavigationProp }) => {
         setMessages((previousMessages) =>
             GiftedChat.append(previousMessages, newMessages)
         );
-        newMessages.forEach((message) => addDoc(collection(db, 'messages'), message));
+        newMessages.forEach((message) => {
+            const messageToSend = {
+                ...message,
+                createdAt: Timestamp.fromDate(new Date()) // Save current date as Firestore timestamp
+            };
+            addDoc(collection(db, 'messages'), messageToSend);
+        });
     }, []);
 
     return (
