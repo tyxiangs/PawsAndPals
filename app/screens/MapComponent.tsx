@@ -77,10 +77,6 @@ const Map = () => {
 
   return (
     <View style={styles.container}>
-      <Button
-        title="Go to Chat"
-        onPress={() => navigation.navigate('Chat')}
-      />
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -101,6 +97,10 @@ const Map = () => {
       <View style={styles.buttonContainer}>
         <Button title="Zoom In" onPress={zoomIn} />
         <Button title="Zoom Out" onPress={zoomOut} />
+              <Button
+                title="Go to Chat"
+                onPress={() => navigation.navigate('Chat')}
+              />
       </View>
     </View>
   );
