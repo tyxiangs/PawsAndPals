@@ -2,15 +2,17 @@ import React, { useState, useCallback, useLayoutEffect, useEffect } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat'; 
 import { auth, db } from '../../FirebaseConfig';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types';
 import { Avatar } from 'react-native-elements';
 import { collection, addDoc, orderBy, query, onSnapshot, Timestamp } from 'firebase/firestore';
 
-type ChatNavigationProp = NavigationProp<RootStackParamList, 'Chat'>;
+type ChatRouteProp = RouteProp<RootStackParamList, 'Chat'>;
 
-const Chat = ({ navigation }: { navigation: ChatNavigationProp }) => {
+const Chat = ({ route, navigation }: { route: ChatRouteProp, navigation: any }) => {
     const [messages, setMessages] = useState<IMessage[]>([]);
+    const { userEmail } = route.params;
+    const currentUser = auth.currentUser;
 
     const goHome = () => {
         navigation.navigate('MapComponent');
@@ -23,7 +25,7 @@ const Chat = ({ navigation }: { navigation: ChatNavigationProp }) => {
                     <Avatar
                         rounded
                         source={{
-                            uri: auth?.currentUser?.photoURL || 'https://placeimg.com/140/140/any',
+                            uri: currentUser?.photoURL || 'https://placeimg.com/140/140/any',
                         }}
                     />
                 </View>
@@ -35,7 +37,7 @@ const Chat = ({ navigation }: { navigation: ChatNavigationProp }) => {
                     }}
                     onPress={goHome}
                 >
-                    <Text>Back Home</Text>
+                    <Text>Back to chats</Text>
                 </TouchableOpacity>
             ),
         });
@@ -46,7 +48,8 @@ const Chat = ({ navigation }: { navigation: ChatNavigationProp }) => {
     }, []);
 
     const getAllMessages = () => {
-        const messagesRef = collection(db, 'messages');
+        const chatRoomId = [currentUser?.email, userEmail].sort().join('_');
+        const messagesRef = collection(db, 'chatRooms', chatRoomId, 'messages');
         const q = query(messagesRef, orderBy('createdAt', 'desc'));
         onSnapshot(q, (snapshot) => {
             const messages = snapshot.docs.map((doc) => {
@@ -54,7 +57,7 @@ const Chat = ({ navigation }: { navigation: ChatNavigationProp }) => {
                 return {
                     _id: doc.id,
                     ...data,
-                    createdAt: data.createdAt.toDate() 
+                    createdAt: data.createdAt.toDate()
                 } as IMessage;
             });
             setMessages(messages);
@@ -65,12 +68,13 @@ const Chat = ({ navigation }: { navigation: ChatNavigationProp }) => {
         setMessages((previousMessages) =>
             GiftedChat.append(previousMessages, newMessages)
         );
+        const chatRoomId = [currentUser?.email, userEmail].sort().join('_');
         newMessages.forEach((message) => {
             const messageToSend = {
                 ...message,
-                createdAt: Timestamp.fromDate(new Date()) // Save current date as Firestore timestamp
+                createdAt: Timestamp.fromDate(new Date())
             };
-            addDoc(collection(db, 'messages'), messageToSend);
+            addDoc(collection(db, 'chatRooms', chatRoomId, 'messages'), messageToSend);
         });
     }, []);
 
@@ -80,9 +84,9 @@ const Chat = ({ navigation }: { navigation: ChatNavigationProp }) => {
             showAvatarForEveryMessage={true}
             onSend={(messages) => onSend(messages)}
             user={{
-                _id: auth?.currentUser?.email || '1',
-                name: auth?.currentUser?.displayName || 'Jolin',
-                avatar: auth?.currentUser?.photoURL || 'https://placeimg.com/140/140/any',
+                _id: currentUser?.email || '1',
+                name: currentUser?.displayName || 'Jolin',
+                avatar: currentUser?.photoURL || 'https://placeimg.com/140/140/any',
             }}
         />
     );

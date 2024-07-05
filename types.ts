@@ -1,6 +1,7 @@
 export type RootStackParamList = {
     Login: undefined;
     MapComponent: undefined;
-    Chat: undefined;
+    Chat: { userEmail: string };
+    UserList: undefined;
   };
   

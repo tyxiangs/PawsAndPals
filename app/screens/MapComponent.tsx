@@ -99,7 +99,7 @@ const Map = () => {
         <Button title="Zoom Out" onPress={zoomOut} />
               <Button
                 title="Go to Chat"
-                onPress={() => navigation.navigate('Chat')}
+                onPress={() => navigation.navigate('UserList')}
               />
       </View>
     </View>

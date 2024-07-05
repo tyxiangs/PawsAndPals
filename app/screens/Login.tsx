@@ -4,6 +4,7 @@ import { auth, db } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types';
+import { doc, setDoc } from 'firebase/firestore';
 
 type LoginScreenNavigationProp = NavigationProp<RootStackParamList, 'Login'>;
 
@@ -17,6 +18,16 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
+      const user = response.user;
+
+      // Store user data in Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: 'John',
+        photoURL: 'Your Default Photo URL', 
+      });
+
       console.log(response);
       navigation.navigate('MapComponent'); // Navigate to Map on successful login
     } catch (error: any) {
