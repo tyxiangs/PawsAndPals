@@ -1,10 +1,12 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import {getFirestore} from 'firebase/firestore';
+import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCdqDzkn4jVsdUeEHb90xIfNAUhjeyOPpE",
   authDomain: "paws-58f7e.firebaseapp.com",
+  databaseURL: "https://paws-58f7e-default-rtdb.firebaseio.com/",
   projectId: "paws-58f7e",
   storageBucket: "paws-58f7e.appspot.com",
   messagingSenderId: "991163936353",
@@ -14,5 +16,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const database = getDatabase(app);
 
-export { app, auth, db };
+export { app, auth, db, database };

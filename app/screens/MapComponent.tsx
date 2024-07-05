@@ -1,127 +1,152 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Button, Image } from 'react-native';
-import MapView, { Marker, Callout, PROVIDER_GOOGLE, Region, LatLng } from 'react-native-maps';
+import React, { useState, useEffect } from 'react';
+import { View, Button, Image, StyleSheet, Modal, Text } from 'react-native';
+import MapView, { Marker, MapPressEvent } from 'react-native-maps';
+import { getDatabase, ref, set, remove, onValue } from 'firebase/database';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../types'; 
 
-const INITIAL_REGION = {
-  latitude: 1.2966,
-  longitude: 103.7764,
-  latitudeDelta: 0.0922,
-  longitudeDelta: 0.0421,
+type MarkerType = {
+  id: string;
+  coordinate: {
+    latitude: number;
+    longitude: number;
+  };
+  image: string;
 };
 
-const MIN_LATITUDE_DELTA = 0.0001; // Allow more precise zooming
-const MAX_LATITUDE_DELTA = 1.0;
-
-interface MarkerData {
-  coordinate: LatLng;
-  image: string | undefined;
-}
-
-type MapComponentNavigationProp = NavigationProp<RootStackParamList, 'MapComponent'>;
-
-const Map = () => {
-  const navigation = useNavigation<MapComponentNavigationProp>();
-  const [region, setRegion] = useState<Region>(INITIAL_REGION);
-  const [markers, setMarkers] = useState<MarkerData[]>([]);
-  const mapRef = useRef<MapView>(null);
-
-  const handleMapPress = async (event: { nativeEvent: { coordinate: LatLng } }) => {
-    const { coordinate } = event.nativeEvent;
-    openImagePicker(coordinate);
-  };
-
-  const openImagePicker = async (coordinate: LatLng) => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const image = result.assets[0].uri;
-      setMarkers((prevMarkers) => [
-        ...prevMarkers,
-        { coordinate, image },
-      ]);
-    }
-  };
-
-  const deleteMarker = (index: number) => {
-    setMarkers((prevMarkers) => prevMarkers.filter((_, i) => i !== index));
-  };
-
-  const zoomIn = () => {
-    setRegion((prevRegion) => ({
-      ...prevRegion,
-      latitudeDelta: Math.max(prevRegion.latitudeDelta / 2, MIN_LATITUDE_DELTA),
-      longitudeDelta: Math.max(prevRegion.longitudeDelta / 2, MIN_LATITUDE_DELTA),
-    }));
-  };
-
-  const zoomOut = () => {
-    setRegion((prevRegion) => ({
-      ...prevRegion,
-      latitudeDelta: Math.min(prevRegion.latitudeDelta * 2, MAX_LATITUDE_DELTA),
-      longitudeDelta: Math.min(prevRegion.longitudeDelta * 2, MAX_LATITUDE_DELTA),
-    }));
-  };
+const MapComponent = () => {
+  const [markers, setMarkers] = useState<MarkerType[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
+  const [showImagePicker, setShowImagePicker] = useState<boolean>(false);
+  const [newMarkerCoordinate, setNewMarkerCoordinate] = useState<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current.animateToRegion(region, 1000);
+    // Fetch markers from Firebase
+    const db = getDatabase();
+    const markersRef = ref(db, 'markers/');
+    onValue(markersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const markersArray = Object.keys(data).map(key => data[key] as MarkerType);
+        setMarkers(markersArray);
+      }
+    });
+  }, []);
+
+  const handleMapPress = (event: MapPressEvent) => {
+    setNewMarkerCoordinate(event.nativeEvent.coordinate);
+    setShowImagePicker(true);
+  };
+
+  const handleAddImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync();
+    if (!result.canceled && newMarkerCoordinate) {
+      const newMarker: MarkerType = {
+        id: Date.now().toString(),
+        coordinate: newMarkerCoordinate,
+        image: result.assets[0].uri,
+      };
+      setMarkers([...markers, newMarker]);
+      // Save to Firebase
+      const db = getDatabase();
+      set(ref(db, 'markers/' + newMarker.id), newMarker);
+      setShowImagePicker(false);
     }
-  }, [region]);
+  };
+
+  const handleDeleteImage = (id: string) => {
+    const newMarkers = markers.filter(marker => marker.id !== id);
+    setMarkers(newMarkers);
+    // Remove from Firebase
+    const db = getDatabase();
+    remove(ref(db, 'markers/' + id));
+    // Deselect image and marker
+    setSelectedImage(null);
+    setSelectedMarkerId(null);
+  };
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
       <MapView
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={INITIAL_REGION}
-        showsUserLocation={true}
-        provider={PROVIDER_GOOGLE}
+        style={{ flex: 1 }}
+        initialRegion={{
+          latitude: 1.2966,
+          longitude: 103.7764,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }}
         onPress={handleMapPress}
       >
-        {markers.map((marker, index) => (
-          <Marker key={index} coordinate={marker.coordinate}>
-            <Image source={{ uri: marker.image }} style={{ width: 50, height: 50 }} />
-            <Callout>
-              <Button title="Delete" onPress={() => deleteMarker(index)} />
-            </Callout>
+        {markers.map(marker => (
+          <Marker
+            key={marker.id}
+            coordinate={marker.coordinate}
+            onPress={() => {
+              setSelectedImage(marker.image);
+              setSelectedMarkerId(marker.id);
+            }}
+          >
+            <Image source={{ uri: marker.image }} style={styles.markerImage} />
           </Marker>
         ))}
       </MapView>
-      <View style={styles.buttonContainer}>
-        <Button title="Zoom In" onPress={zoomIn} />
-        <Button title="Zoom Out" onPress={zoomOut} />
-              <Button
-                title="Go to Chat"
-                onPress={() => navigation.navigate('Chat')}
-              />
-      </View>
+      {showImagePicker && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showImagePicker}
+          onRequestClose={() => setShowImagePicker(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text>Select an image to attach to the selected location:</Text>
+              <Button title="Pick Image" onPress={handleAddImage} />
+              <Button title="Cancel" onPress={() => setShowImagePicker(false)} />
+            </View>
+          </View>
+        </Modal>
+      )}
+      {selectedImage && (
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+          <Button title="Delete Image" onPress={() => selectedMarkerId && handleDeleteImage(selectedMarkerId)} />
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+  markerImage: {
+    width: 50,
+    height: 50,
   },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  buttonContainer: {
+  imageContainer: {
     position: 'absolute',
-    bottom: 50,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
+    bottom: 10,
+    left: 10,
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 5,
+  },
+  selectedImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
   },
 });
 
-export default Map;
+export default MapComponent;
