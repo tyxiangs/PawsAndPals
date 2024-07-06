@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, ActivityIndicator, Button, KeyboardAvoidingView, Image, Alert } from 'react-native';
-import { auth } from '../../FirebaseConfig'; // Ensure this import is correct
+import { auth, db } from '../../FirebaseConfig'; // Ensure this import is correct
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { collection, doc, setDoc } from 'firebase/firestore'; 
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types'; // Ensure this import is correct
 
@@ -32,6 +33,14 @@ const Login = () => {
     try {
       const response = await createUserWithEmailAndPassword(auth, email, password);
       console.log(response);
+
+      // Save user info to Firestore
+      const userDoc = doc(db, 'users', response.user.uid);
+      await setDoc(userDoc, {
+        email: response.user.email,
+        uid: response.user.uid,
+      });
+
       Alert.alert('Account created!', 'You can now log in with your new account.');
     } catch (error: any) {
       console.log(error);
