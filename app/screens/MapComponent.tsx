@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Button, Image, StyleSheet, Modal, Text } from 'react-native';
-import MapView, { Marker, MapPressEvent } from 'react-native-maps';
+import MapView, { Marker, MapPressEvent, Region } from 'react-native-maps';
 import { getDatabase, ref, set, remove, onValue } from 'firebase/database';
 import * as ImagePicker from 'expo-image-picker';
+import { NavigationProp, ParamListBase } from '@react-navigation/native';
 
 type MarkerType = {
   id: string;
@@ -13,12 +14,22 @@ type MarkerType = {
   image: string;
 };
 
-const MapComponent = () => {
+interface MapComponentProps {
+  navigation: NavigationProp<ParamListBase>;
+}
+
+const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
   const [markers, setMarkers] = useState<MarkerType[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
   const [showImagePicker, setShowImagePicker] = useState<boolean>(false);
   const [newMarkerCoordinate, setNewMarkerCoordinate] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [region, setRegion] = useState<Region>({
+    latitude: 1.2966,
+    longitude: 103.7764,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  });
 
   useEffect(() => {
     // Fetch markers from Firebase
@@ -65,16 +76,36 @@ const MapComponent = () => {
     setSelectedMarkerId(null);
   };
 
+  const handleZoomIn = () => {
+    setRegion((prevRegion) => {
+      const newLatitudeDelta = prevRegion.latitudeDelta / 2;
+      const newLongitudeDelta = prevRegion.longitudeDelta / 2;
+
+      // Set minimum zoom level to avoid issues
+      const minDelta = 0.0001;
+
+      return {
+        ...prevRegion,
+        latitudeDelta: Math.max(newLatitudeDelta, minDelta),
+        longitudeDelta: Math.max(newLongitudeDelta, minDelta),
+      };
+    });
+  };
+
+  const handleZoomOut = () => {
+    setRegion((prevRegion) => ({
+      ...prevRegion,
+      latitudeDelta: prevRegion.latitudeDelta * 2,
+      longitudeDelta: prevRegion.longitudeDelta * 2,
+    }));
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <MapView
         style={{ flex: 1 }}
-        initialRegion={{
-          latitude: 1.2966,
-          longitude: 103.7764,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
+        region={region}
+        onRegionChangeComplete={setRegion}
         onPress={handleMapPress}
       >
         {markers.map(marker => (
@@ -112,6 +143,14 @@ const MapComponent = () => {
           <Button title="Delete Image" onPress={() => selectedMarkerId && handleDeleteImage(selectedMarkerId)} />
         </View>
       )}
+      <View style={styles.buttonContainer}>
+        <Button title="Zoom In" onPress={handleZoomIn} />
+        <Button title="Zoom Out" onPress={handleZoomOut} />
+        <Button
+          title="Go to Chat"
+          onPress={() => navigation.navigate('UserList')}
+        />
+      </View>
     </View>
   );
 };
@@ -147,6 +186,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    flexDirection: 'row',
+  },
 });
 
 export default MapComponent;
+
+
+

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, Text, ActivityIndicator, Button, KeyboardAvoidingView, Image } from 'react-native';
-import { auth, db } from '../../FirebaseConfig';
+import { View, TextInput, StyleSheet, ActivityIndicator, Button, KeyboardAvoidingView, Image, Alert } from 'react-native';
+import { auth } from '../../FirebaseConfig'; // Ensure this import is correct
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../types';
+import { RootStackParamList } from '../../types'; // Ensure this import is correct
 
 type LoginScreenNavigationProp = NavigationProp<RootStackParamList, 'Login'>;
 
@@ -21,7 +21,7 @@ const Login = () => {
       navigation.navigate('MapComponent'); // Navigate to Map on successful login
     } catch (error: any) {
       console.log(error);
-      alert('Sign in failed: ' + error.message);
+      Alert.alert('Sign in failed', error.message);
     } finally {
       setLoading(false);
     }
@@ -32,10 +32,10 @@ const Login = () => {
     try {
       const response = await createUserWithEmailAndPassword(auth, email, password);
       console.log(response);
-      alert('Account created!');
+      Alert.alert('Account created!', 'You can now log in with your new account.');
     } catch (error: any) {
       console.log(error);
-      alert('Sign up failed: ' + error.message);
+      Alert.alert('Sign up failed', error.message);
     } finally {
       setLoading(false);
     }
@@ -50,6 +50,7 @@ const Login = () => {
           style={styles.input}
           placeholder="Email"
           autoCapitalize="none"
+          keyboardType="email-address"
           onChangeText={(text) => setEmail(text)}
         />
         <TextInput
@@ -75,7 +76,6 @@ const Login = () => {
 };
 
 export default Login;
-
 
 const styles = StyleSheet.create({
   container: {
