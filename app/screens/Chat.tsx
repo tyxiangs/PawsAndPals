@@ -15,7 +15,7 @@ const Chat = ({ route, navigation }: { route: ChatRouteProp, navigation: any }) 
     const currentUser = auth.currentUser;
 
     const goHome = () => {
-        navigation.navigate('ChatList');
+        navigation.navigate('UserList');
     };
 
     useLayoutEffect(() => {
