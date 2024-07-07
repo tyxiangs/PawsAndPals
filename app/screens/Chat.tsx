@@ -18,6 +18,11 @@ const Chat = ({ route, navigation }: { route: ChatRouteProp, navigation: any }) 
         navigation.navigate('UserList');
     };
 
+    // Function to extract the name from the email
+    const extractNameFromEmail = (email: string) => {
+        return email.split('@')[0];
+    };
+
     useLayoutEffect(() => {
         navigation.setOptions({
             headerLeft: () => (
@@ -40,8 +45,9 @@ const Chat = ({ route, navigation }: { route: ChatRouteProp, navigation: any }) 
                     <Text>Back to chats</Text>
                 </TouchableOpacity>
             ),
+            title: extractNameFromEmail(userEmail), // Set the extracted name as the title
         });
-    }, [navigation]);
+    }, [navigation, userEmail]);
 
     useEffect(() => {
         getAllMessages();
