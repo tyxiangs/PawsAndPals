@@ -32,14 +32,15 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await createUserWithEmailAndPassword(auth, email, password);
-      console.log(response);
-
+      console.log('User created:', response.user);
       // Save user info to Firestore
       const userDoc = doc(db, 'users', response.user.uid);
       await setDoc(userDoc, {
         email: response.user.email,
         uid: response.user.uid,
       });
+      console.log('User added to Firestore:', response.user.email);
+
 
       Alert.alert('Account created!', 'You can now log in with your new account.');
     } catch (error: any) {

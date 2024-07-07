@@ -1,13 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { db } from '../../FirebaseConfig';
-import { collection, getDocs } from 'firebase/firestore';
+import { db, auth } from '../../FirebaseConfig';
+import { collection, getDocs, onSnapshot, query, where } from 'firebase/firestore';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types';
-
 type UserListNavigationProp = NavigationProp<RootStackParamList, 'UserList'>;
-
 const UserList = () => {
   const [users, setUsers] = useState<{ email: string }[]>([]);
   const navigation = useNavigation<UserListNavigationProp>();
@@ -24,11 +21,9 @@ const UserList = () => {
     };
     fetchUsers();
   }, []);
-
   const handleSelectUser = (userEmail: string) => {
     navigation.navigate('Chat', { userEmail });
   };
-
   return (
     <View style={styles.container}>
       <FlatList
@@ -43,7 +38,6 @@ const UserList = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -55,5 +49,4 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
 });
-
 export default UserList;
