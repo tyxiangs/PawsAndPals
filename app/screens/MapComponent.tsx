@@ -3,6 +3,7 @@ import { View, Button, Image, StyleSheet, Modal, Text } from 'react-native';
 import MapView, { Marker, MapPressEvent, Region } from 'react-native-maps';
 import { getDatabase, ref, set, remove, onValue } from 'firebase/database';
 import * as ImagePicker from 'expo-image-picker';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 
 type MarkerType = {
@@ -32,7 +33,6 @@ const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
   });
 
   useEffect(() => {
-    // Fetch markers from Firebase
     const db = getDatabase();
     const markersRef = ref(db, 'markers/');
     onValue(markersRef, (snapshot) => {
@@ -52,15 +52,29 @@ const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
   const handleAddImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync();
     if (!result.canceled && newMarkerCoordinate) {
+      const imageUri = result.assets[0].uri;
+
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+
+      const storage = getStorage();
+      const imageRef = storageRef(storage, `images/${Date.now().toString()}`);
+
+      await uploadBytes(imageRef, blob);
+
+      const downloadURL = await getDownloadURL(imageRef);
+
       const newMarker: MarkerType = {
         id: Date.now().toString(),
         coordinate: newMarkerCoordinate,
-        image: result.assets[0].uri,
+        image: downloadURL,
       };
+
       setMarkers([...markers, newMarker]);
-      // Save to Firebase
+
       const db = getDatabase();
       set(ref(db, 'markers/' + newMarker.id), newMarker);
+
       setShowImagePicker(false);
     }
   };
@@ -68,10 +82,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
   const handleDeleteImage = (id: string) => {
     const newMarkers = markers.filter(marker => marker.id !== id);
     setMarkers(newMarkers);
-    // Remove from Firebase
     const db = getDatabase();
     remove(ref(db, 'markers/' + id));
-    // Deselect image and marker
     setSelectedImage(null);
     setSelectedMarkerId(null);
   };
@@ -81,7 +93,6 @@ const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
       const newLatitudeDelta = prevRegion.latitudeDelta / 2;
       const newLongitudeDelta = prevRegion.longitudeDelta / 2;
 
-      // Set minimum zoom level to avoid issues
       const minDelta = 0.0001;
 
       return {
@@ -195,6 +206,9 @@ const styles = StyleSheet.create({
 });
 
 export default MapComponent;
+
+
+
 
 
 
