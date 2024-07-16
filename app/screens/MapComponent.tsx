@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Button, Image, StyleSheet, Modal, Text } from 'react-native';
+import { View, Button, Image, StyleSheet, Modal, Text, TouchableOpacity } from 'react-native';
 import MapView, { Marker, MapPressEvent, Region } from 'react-native-maps';
 import { getDatabase, ref, set, remove, onValue } from 'firebase/database';
 import * as ImagePicker from 'expo-image-picker';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { auth } from '../../FirebaseConfig';
 
 type MarkerType = {
   id: string;
@@ -13,6 +14,7 @@ type MarkerType = {
     longitude: number;
   };
   image: string;
+  userEmail: string;
 };
 
 interface MapComponentProps {
@@ -22,7 +24,7 @@ interface MapComponentProps {
 const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
   const [markers, setMarkers] = useState<MarkerType[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
+  const [selectedMarker, setSelectedMarker] = useState<MarkerType | null>(null);
   const [showImagePicker, setShowImagePicker] = useState<boolean>(false);
   const [newMarkerCoordinate, setNewMarkerCoordinate] = useState<{ latitude: number; longitude: number } | null>(null);
   const [region, setRegion] = useState<Region>({
@@ -64,10 +66,17 @@ const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
 
       const downloadURL = await getDownloadURL(imageRef);
 
+      const currentUser = auth.currentUser;
+      if (!currentUser || !currentUser.email) {
+        console.error('No authenticated user found');
+        return;
+      }
+
       const newMarker: MarkerType = {
         id: Date.now().toString(),
         coordinate: newMarkerCoordinate,
         image: downloadURL,
+        userEmail: currentUser.email,
       };
 
       setMarkers([...markers, newMarker]);
@@ -85,7 +94,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
     const db = getDatabase();
     remove(ref(db, 'markers/' + id));
     setSelectedImage(null);
-    setSelectedMarkerId(null);
+    setSelectedMarker(null);
   };
 
   const handleZoomIn = () => {
@@ -111,6 +120,12 @@ const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
     }));
   };
 
+  const handleChatPress = () => {
+    if (selectedMarker) {
+      navigation.navigate('Chat', { userEmail: selectedMarker.userEmail });
+    }
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <MapView
@@ -125,7 +140,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
             coordinate={marker.coordinate}
             onPress={() => {
               setSelectedImage(marker.image);
-              setSelectedMarkerId(marker.id);
+              setSelectedMarker(marker);
             }}
           >
             <Image source={{ uri: marker.image }} style={styles.markerImage} />
@@ -148,10 +163,11 @@ const MapComponent: React.FC<MapComponentProps> = ({ navigation }) => {
           </View>
         </Modal>
       )}
-      {selectedImage && (
+      {selectedImage && selectedMarker && (
         <View style={styles.imageContainer}>
           <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
-          <Button title="Delete Image" onPress={() => selectedMarkerId && handleDeleteImage(selectedMarkerId)} />
+          <Button title="Chat with User" onPress={handleChatPress} />
+          <Button title="Delete Image" onPress={() => handleDeleteImage(selectedMarker.id)} />
         </View>
       )}
       <View style={styles.buttonContainer}>
@@ -206,6 +222,8 @@ const styles = StyleSheet.create({
 });
 
 export default MapComponent;
+
+
 
 
 

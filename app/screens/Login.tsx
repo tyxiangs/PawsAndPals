@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, ActivityIndicator, Button, KeyboardAvoidingView, Image, Alert } from 'react-native';
-import { auth, db } from '../../FirebaseConfig'; // Ensure this import is correct
+import { auth, db } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, doc, setDoc } from 'firebase/firestore'; 
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../types'; // Ensure this import is correct
+import { RootStackParamList } from '../../types';
 
 type LoginScreenNavigationProp = NavigationProp<RootStackParamList, 'Login'>;
 
@@ -19,7 +19,7 @@ const Login = () => {
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
       console.log(response);
-      navigation.navigate('MapComponent'); // Navigate to Map on successful login
+      navigation.navigate('MapComponent');
     } catch (error: any) {
       console.log(error);
       Alert.alert('Sign in failed', error.message);
