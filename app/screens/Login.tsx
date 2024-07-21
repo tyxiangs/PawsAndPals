@@ -19,7 +19,7 @@ const Login = () => {
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
       console.log(response);
-      navigation.navigate('MapComponent');
+      navigation.navigate('HomePage');
     } catch (error: any) {
       console.log(error);
       Alert.alert('Sign in failed', error.message);

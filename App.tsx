@@ -6,6 +6,7 @@ import Login from './app/screens/Login';
 import MapComponent from './app/screens/MapComponent';
 import Chat from './app/screens/Chat';
 import UserList from './app/screens/UserList';
+import HomePage from './app/screens/HomePage';
 import { RootStackParamList } from './types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -15,6 +16,7 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="HomePage" component={HomePage} />
         <Stack.Screen
           name="MapComponent"
           component={MapComponent}
