@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: 'orange',  // Updated color to orange
+    color: 'orange', 
   },
   buttonContainer: {
     marginVertical: 10,
